@@ -11,10 +11,6 @@
 #include "MPC.h"
 #include "json.hpp"
 
-#include "matplotlibcpp.h"
-
-namespace plt = matplotlibcpp;
-
 
 // for convenience
 using json = nlohmann::json;
@@ -102,93 +98,6 @@ void read_csv(vector<double>& xvals, vector<double>& yvals) {
     }
   }
   file.close();
-}
-
-int main2(){
-
-
-  vector<double> x_traj, y_traj;
-  read_csv(x_traj, y_traj);
-  Eigen::VectorXd ptsx = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(x_traj.data(), x_traj.size());
-  Eigen::VectorXd ptsy = Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(y_traj.data(), y_traj.size());
-  Eigen::VectorXd coeffs = polyfit(ptsx, ptsy, 3);
-
-//  coeffs << 128.955, 0.338439, -0.00502765;
-//  double px = -40.6201, py = 108.73, psi = 3.73367, v = 0.667924;
-//  Eigen::VectorXd ptsx(4);
-//  ptsx << 30, 40, 50, 60;
-//  Eigen::VectorXd ptsy(4);
-//  ptsx << -1, -1, -1, -1;
-//  coeffs = polyfit(ptsx, ptsy, 1);
-//  double px = 100.0, py = -10.0, psi = 0.0, v = 10.0;
-
-  double px = x_traj[0], py = y_traj[0], psi = 0.0, v = 10.0;
-  double fx = polyeval(coeffs, px);
-  double cte = fx - py;
-  double slope = 3*coeffs[3]*px*px + 2*coeffs[2]*px + coeffs[1];
-  double psi_ref = atan(slope);
-  psi = psi_ref;
-  double epsi = psi - psi_ref;
-  Eigen::VectorXd state(6);
-  state << px, py, psi, v, cte, epsi;
-
-
-  std::cout << "Coeffs: ";
-  print_vec(coeffs);
-  std::cout << "Starting state :";
-  print_vec(state);
-  MPC mpc;
-
-  std::vector<double> x_vals = {state[0]};
-  std::vector<double> y_vals = {state[1]};
-  std::vector<double> psi_vals = {state[2]};
-  std::vector<double> v_vals = {state[3]};
-  std::vector<double> cte_vals = {state[4]};
-  std::vector<double> epsi_vals = {state[5]};
-  std::vector<double> delta_vals = {};
-  std::vector<double> a_vals = {};
-
-
-  double cte_sum = 0;
-  int step = 100;
-  for (int i=0; i<step; i++) {
-    auto vars = mpc.Solve(state, coeffs);
-    state << vars[2], vars[3], vars[4], vars[5], vars[6], vars[7];
-    std::cout << "State after " << i << " : ";
-    print_vec(vars);
-
-
-    x_vals.push_back(vars[2]);
-    y_vals.push_back(vars[3]);
-    psi_vals.push_back(vars[4]);
-    v_vals.push_back(vars[5]);
-    cte_vals.push_back(vars[6]);
-    epsi_vals.push_back(vars[7]);
-
-    delta_vals.push_back(vars[0]);
-    a_vals.push_back(vars[1]);
-
-    cte_sum += vars[6];
-
-  }
-
-  std::cout << "Average CTE: " << cte_sum/float(step) << std::endl;
-  plt::subplot(4, 1, 1);
-  plt::title("CTE");
-  plt::plot(cte_vals);
-  plt::subplot(4, 1, 2);
-  plt::title("Delta (Radians)");
-  plt::plot(delta_vals);
-  plt::subplot(4, 1, 3);
-  plt::title("Acceleration");
-  plt::plot(a_vals);
-  plt::subplot(4, 1, 4);
-  plt::title("Velocity");
-  plt::plot(v_vals);
-
-
-  plt::show();
-
 }
 
 int main() {
