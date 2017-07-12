@@ -251,6 +251,7 @@ int main() {
           double steer_value = -results[0]/deg2rad(25); //-1.0;
           double throttle_value = results[1]; //0.3;
 
+          //std::cout << "CTE: "<< cte << std::endl;
 
 
           json msgJson;
@@ -266,6 +267,9 @@ int main() {
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Green line
 
+          mpc_x_vals = std::vector<double>(results.begin()+8, results.begin()+14);
+          mpc_y_vals = std::vector<double>(results.begin()+14, results.begin()+20);
+
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
 
@@ -276,16 +280,15 @@ int main() {
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
 
-          next_x_vals = {1, 5, 10, 15};
-          for (auto x: next_x_vals) next_y_vals.push_back(polyeval(coeffs, x));
-
+          next_x_vals = vptsx;
+          next_y_vals = vptsy;
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
 
 
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           // Latency
           // The purpose is to mimic real driving conditions where
           // the car does actuate the commands instantly.

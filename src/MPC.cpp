@@ -239,7 +239,7 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 
   // Cost
   auto cost = solution.obj_value;
-  std::cout << "Cost " << cost << std::endl;
+  //std::cout << "Cost " << cost << std::endl;
 //  std::cout << "Velocities: ";
 //  for (int i=v_start; i < v_start+10; i++) {
 //    std::cout << solution.x[i+1] << ", ";
@@ -253,6 +253,9 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // creates a 2 element double vector.
   return {
     solution.x[delta_start], solution.x[a_start],
-    solution.x[x_start+1], solution.x[y_start+1], solution.x[psi_start+1], solution.x[v_start+1], solution.x[cte_start+1], solution.x[epsi_start+1]
+    solution.x[x_start+1], solution.x[y_start+1], solution.x[psi_start+1], solution.x[v_start+1], solution.x[cte_start+1], solution.x[epsi_start+1],
+    solution.x[x_start+1], solution.x[x_start+5], solution.x[x_start+9], solution.x[x_start+13], solution.x[x_start+17], solution.x[x_start+21],
+    solution.x[y_start+1], solution.x[y_start+5], solution.x[y_start+9], solution.x[y_start+13], solution.x[y_start+17], solution.x[y_start+21],
+
   };
 }
